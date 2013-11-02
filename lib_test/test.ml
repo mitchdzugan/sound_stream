@@ -1,6 +1,6 @@
 open Sdlmixer
 open Unix
-open Pitch
+open Types
 open Sound
 
 let sound_c_dim = sounds_of_pitches_in_order_const_vol

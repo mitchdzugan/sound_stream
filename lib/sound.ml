@@ -1,5 +1,6 @@
 open Sdlmixer
 open Core.Std_kernel
+open Types
 open Tone
 
 let _AMPLITUDE = 31000.0
@@ -8,10 +9,6 @@ let _PI = 4.0 *. atan(1.0)
 
 let rec range i j = if i > j then [] else i :: (range (i+1) j)
 let nums = range 0 44100
-
-type frequency_ = float
-type volume_ = float
-type sound = Sound of volume_ * frequency_
 
 let sounds_of_tones_const_vol tones vol =
     List.map tones (fun t -> Sound (vol, freq_of_tone t))
