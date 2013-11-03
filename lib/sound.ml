@@ -1,5 +1,5 @@
 open Sdlmixer
-open Core.Std_kernel
+open Core.Std
 open Types
 open Tone
 
@@ -11,7 +11,7 @@ let rec range i j = if i > j then [] else i :: (range (i+1) j)
 let nums = range 0 44100
 
 let sounds_of_tones_const_vol tones vol =
-    List.map tones (fun t -> Sound (vol, freq_of_tone t))
+    List.map tones (fun t -> Sound (freq_of_tone t, vol))
 
 let sounds_of_pitches_in_order_const_vol pitches base_octave vol =
     sounds_of_tones_const_vol (tones_of_pitches_in_order pitches base_octave) vol
@@ -21,12 +21,12 @@ let chars_of_short i =
     (char_of_int (i land 255), 
      char_of_int ((i lsr 8) land 255))
 
-(* val map_explode_condense : ('a -> ('b, 'b)) -> 'a list -> 'b list *)
-let rec map_explode_condense f l = match l with
+(* val map_explode_condense : 'a list -> ('a -> ('b, 'b)) -> 'b list *)
+let rec map_explode_condense l f = match l with
     | [] -> []
     | x::xs ->
             let (a, b) = f x in 
-            a::b::(map_explode_condense f xs)
+            a::b::(map_explode_condense xs f)
 
 (* val eval_sound : sound list -> float -> i -> float *)
 let eval_sound sound_list total_vol i =
@@ -36,7 +36,7 @@ let eval_sound sound_list total_vol i =
         _AMPLITUDE *. imm *. vol /. total_vol in
     let sound_contrib freq vol i =
         normalize_vol (calc_immediate freq i) vol in
-    List.fold_left sound_list ~init:0.0 ~f:(fun sum (Sound(vol, freq)) -> sum +. (sound_contrib freq vol i))
+    List.fold_left sound_list ~init:0.0 ~f:(fun sum (Sound(freq, vol)) -> sum +. (sound_contrib freq vol i))
 
 (* val marshall_sound : float -> (char, char) *)
 let marshall_sound s =
@@ -45,5 +45,5 @@ let marshall_sound s =
 (* val sound_list_to_chunk : sound list -> chunk *)
 let sound_list_to_chunk sound_list =
     let total_vol = float (List.length sound_list) in
-    let raw_string = String.of_char_list (map_explode_condense (fun i -> (marshall_sound (eval_sound sound_list total_vol i))) nums) in
+    let raw_string = String.of_char_list (map_explode_condense nums (fun i -> (marshall_sound (eval_sound sound_list total_vol i)))) in
     load_string_raw raw_string

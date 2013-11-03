@@ -1,3 +1,4 @@
+open Core.Std
 open Types
 
 let int_of_pitch = function
@@ -65,4 +66,8 @@ let freq_of_tone = function
                 then (fun freq -> freq /. (float (2 lsl (1 - o))))
                 else (fun freq -> freq *. (float (2 lsl (o - 1)))) in
         scale_fun base_freq
+
+let make_chord notes base_octave vol duration =
+    let tones = tones_of_pitches_in_order notes base_octave in
+    List.map tones (fun t -> Note(t, vol, duration))
 
